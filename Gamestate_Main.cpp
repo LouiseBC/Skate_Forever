@@ -6,14 +6,14 @@ bool MainGameState::init(Graphics* graph, Game* gam) {
     
     player.init(graphics);
     scenery.init(graphics);
-    obstacle.init(graphics);
+    obstacles.init(graphics);
     
     return true;
 }
 MainGameState::~MainGameState() {
     player.destroy();
     scenery.destroy();
-    obstacle.destroy();
+    obstacles.destroy();
     game     = nullptr;
     graphics = nullptr;
 }
@@ -24,10 +24,10 @@ void MainGameState::handleEvents(SDL_Event& event) {
     if (event.type == SDL_MOUSEBUTTONDOWN)
         game->setQuit();
     if (event.type == SDL_KEYDOWN)
-        player.handleEvent(event, obstacle.obstacleType());
+        player.handleEvent(event, obstacles.type());
 }
 void MainGameState::update(float deltaTime) {
-    obstacle.update(deltaTime);
+    obstacles.update(deltaTime);
     player.update(deltaTime);
 }
 
@@ -36,7 +36,7 @@ void MainGameState::render() {
     
     scenery.render();
     player.render();
-    obstacle.render();
+    obstacles.render();
     
     graphics->renderPresent();
 }

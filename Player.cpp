@@ -43,9 +43,3 @@ void Player::update(float deltaTime) {
         jump(deltaTime);
     }
 }
-/*
- int  yvel                   { 10 }; 320 default
- const int  maxheight        { Y_POS_DEFAULT - 120}; =200
- bool isjumping              { false };
- int obstacle                { -1 };
- };*/

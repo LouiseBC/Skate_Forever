@@ -3,7 +3,7 @@
 #include "GameState.hpp"
 #include "Player.hpp"
 #include "Scenery.hpp"
-#include "Obstacle.hpp"
+#include "Obstacles.hpp"
 
 class MainGameState : public GameState {
 public:
@@ -19,7 +19,7 @@ private:
     
     Player player;
     Scenery scenery;
-    Obstacle obstacle;
+    Obstacles obstacles;
 };
 
 #endif
