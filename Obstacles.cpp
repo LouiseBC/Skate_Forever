@@ -12,6 +12,7 @@ void Obstacles::init(Graphics *graph) {
 void Obstacles::destroy() {
     graphics = nullptr;
     delete currentObstacle;
+    currentObstacle = nullptr;
 }
 
 void Obstacles::update(float deltaTime) {

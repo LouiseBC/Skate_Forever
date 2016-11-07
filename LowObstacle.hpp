@@ -4,20 +4,20 @@
 
 class LowObstacle : public Obstacle {
 public:
+    LowObstacle();
     ~LowObstacle();
-    void init();
     
     void move(float deltaTime);
     void render(SDL_Renderer* renderer);
     
-    int type() { return obstacletype; }
-    bool isOnScreen() { return isonscreen; }
+    int type() { return obstacleType; }
+    bool isOnScreen() { return isOnscreen; }
 
 private:
-    int obstacletype           { type::low };
-    bool isonscreen            { true };
+    int obstacleType           { type::low };
+    bool isOnscreen            { true };
     
-    SDL_Rect obstaclePosition[2];
+    std::vector<SDL_Rect> positionRects;
 };
 
 #endif

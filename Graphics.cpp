@@ -1,6 +1,5 @@
 #include "Graphics.hpp"
 
-
 void Graphics::setup() {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
         std::cerr << "Error: init" << SDL_GetError() << std::endl;

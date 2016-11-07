@@ -1,6 +1,5 @@
 #ifndef Obstacles_hpp
 #define Obstacles_hpp
-//#include "Graphics.hpp"
 #include <vector>
 
 class Graphics;

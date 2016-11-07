@@ -1,11 +1,13 @@
 #ifndef Obstacle_hpp
 #define Obstacle_hpp
 #include "SDL2/SDL.h"
+#include <vector>
+
+class Graphics;
 
 class Obstacle {
 public:
     virtual ~Obstacle() {};
-    virtual void init() = 0;
     
     virtual void move(float deltaTime) = 0;
     virtual void render(SDL_Renderer* renderer) = 0;
@@ -19,7 +21,7 @@ protected:
     const int GROUND_Y         { 429 };
     const int OFFSCREEN_X      { 720 };
     
-    const float MOVE_SPEED     { 250.0f};
+    const float MOVE_SPEED     { 300.0f };
     enum type                  { low = 0, square };
     
 };
