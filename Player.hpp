@@ -25,9 +25,9 @@ private:
     SDL_Rect playerPos { X_POS, Y_POS_DEFAULT, SPRITE_WIDTH, SPRITE_HEIGHT };
     
     // Jump data
-    const float Y_VEL_DEFAULT     { -300.0f };
+    const float Y_VEL_DEFAULT     { -400.0f };
     float  yVelocity              { Y_VEL_DEFAULT };
-    float  gravity                { 300.0f };
+    float  gravity                { 400.0f };
     bool isjumping              { false };
     int obstacle                { -1 };
 };
