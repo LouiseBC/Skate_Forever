@@ -7,11 +7,13 @@ public:
     LowObstacle();
     ~LowObstacle();
     
-    void move(float deltaTime);
+    void move(const float& deltaTime);
+    void move(const int& xPos);
     void render(SDL_Renderer* renderer);
     
-    int type() { return obstacleType; }
-    bool isOnScreen() { return isOnscreen; }
+    int& type() { return obstacleType; }
+    bool& isOnScreen() { return isOnscreen; }
+    std::vector<SDL_Rect>& positions() { return positionRects; }
 
 private:
     int obstacleType           { type::low };

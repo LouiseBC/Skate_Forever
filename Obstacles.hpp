@@ -10,11 +10,12 @@ public:
     void init(Graphics* graphics);
     void destroy();
     
-    void update(float deltaTime);
+    void update(const float& deltaTime);
     void render();
     void reset();
     
     int type();
+    Obstacle* current();
     
 private:
     Graphics* graphics = nullptr;

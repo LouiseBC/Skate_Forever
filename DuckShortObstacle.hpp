@@ -1,11 +1,11 @@
-#ifndef SquareObstacle_hpp
-#define SquareObstacle_hpp
+#ifndef DuckShortObstacle_hpp
+#define DuckShortObstacle_hpp
 #include "Obstacle.hpp"
 
-class SquareObstacle : public Obstacle {
+class DuckShortObstacle : public Obstacle {
 public:
-    SquareObstacle();
-    ~SquareObstacle();
+    DuckShortObstacle();
+    ~DuckShortObstacle();
     
     void move(const float& deltaTime);
     void move(const int& xPos);
@@ -16,10 +16,9 @@ public:
     std::vector<SDL_Rect>& positions() { return positionRects; }
     
 private:
-    int obstacleType           { type::square };
+    int obstacleType           { type::duckshort };
     bool isOnscreen            { true };
     
     std::vector<SDL_Rect> positionRects;
 };
-
 #endif

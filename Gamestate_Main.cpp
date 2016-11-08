@@ -21,14 +21,20 @@ MainGameState::~MainGameState() {
 void MainGameState::handleEvents(SDL_Event& event) {
     if (event.type == SDL_QUIT)
         game->setQuit();
-    if (event.type == SDL_MOUSEBUTTONDOWN)
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
         game->setQuit();
-    if (event.type == SDL_KEYDOWN)
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
+        pause = !pause;
+    
+    // Any other key event is player-related
+    else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
         player.handleEvent(event, obstacles.type());
 }
-void MainGameState::update(float deltaTime) {
-    obstacles.update(deltaTime);
-    player.update(deltaTime);
+void MainGameState::update(const float& deltaTime) {
+    if (pause == false && !player.hasDied()) {
+        obstacles.update(deltaTime);
+        player.update(deltaTime, obstacles.current());
+    }
 }
 
 void MainGameState::render() {
@@ -37,6 +43,7 @@ void MainGameState::render() {
     scenery.render();
     player.render();
     obstacles.render();
+    player.renderScore();
     
     graphics->renderPresent();
 }

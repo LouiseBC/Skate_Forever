@@ -6,8 +6,8 @@ Game::Game() {
 }
 
 bool Game::init(GameState *state) {
-    graphics.setup();
-    pushState(state);
+    if (graphics.setup());
+        pushState(state);
     return true;
 }
 

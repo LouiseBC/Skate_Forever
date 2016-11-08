@@ -11,11 +11,14 @@ public:
     ~MainGameState();
     
     void handleEvents(SDL_Event& e);
-    void update(float deltaTime);
+    void update(const float& deltaTime);
     void render();
+    
 private:
-    Game* game         = nullptr;
-    Graphics* graphics = nullptr;
+    bool pause         { false };
+    
+    Game* game         { nullptr };
+    Graphics* graphics { nullptr };
     
     Player player;
     Scenery scenery;
