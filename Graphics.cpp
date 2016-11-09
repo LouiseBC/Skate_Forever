@@ -37,12 +37,17 @@ void Graphics::destroy() {
 SDL_Texture* Graphics::loadTexture(std::string filepath) {
     SDL_Texture* temp = IMG_LoadTexture(rend, filepath.c_str());
     if (temp == nullptr)
-        std::cerr << "Error: Load dino texture";
+        std::cerr << "Error: Load texture " << filepath << std::endl;
     return temp;
 }
 
-void Graphics::renderTexture(SDL_Texture *texture, SDL_Rect position) {
-    SDL_RenderCopy(rend, texture, nullptr, &position);
+void Graphics::renderTexture(SDL_Texture *texture, SDL_Rect* position, SDL_Rect* clip) {
+    SDL_RenderCopy(rend, texture, clip, position);
+}
+
+void Graphics::renderRotatedTexture(SDL_Texture *texture, SDL_Rect* position, SDL_Rect* clip, const double angle, const
+                                    SDL_Point center) {
+    SDL_RenderCopyEx(rend, texture, clip, position, angle, &center, SDL_FLIP_NONE);
 }
 
 SDL_Texture* Graphics::renderText(const std::string &message, const std::string &filepath, SDL_Color colour, int fontsize) {

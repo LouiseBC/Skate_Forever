@@ -8,7 +8,7 @@
 
 void Obstacles::init(Graphics *graph) {
     graphics = graph;
-    currentObstacle = new LowObstacle;
+    currentObstacle = new SquareObstacle;
 }
 
 void Obstacles::destroy() {
@@ -45,7 +45,7 @@ void Obstacles::reset() {
 }
 
 void Obstacles::render() {
-    SDL_SetRenderDrawColor(graphics->renderer(), 70, 138, 201, 1);
+    SDL_SetRenderDrawColor(graphics->renderer(), 221, 209, 0, 1);
     currentObstacle->render(graphics->renderer());
 }
 

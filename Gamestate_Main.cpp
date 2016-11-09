@@ -31,7 +31,8 @@ void MainGameState::handleEvents(SDL_Event& event) {
         player.handleEvent(event, obstacles.type());
 }
 void MainGameState::update(const float& deltaTime) {
-    if (pause == false && !player.hasDied()) {
+    if (pause == false && player.status() != Player::state::dead) {
+        scenery.update(deltaTime);
         obstacles.update(deltaTime);
         player.update(deltaTime, obstacles.current());
     }
