@@ -14,15 +14,15 @@ void Scenery::destroy() {
     graphics = nullptr;
 }
 
-void Scenery::update(const float &deltaTime) {
-    farBuildingsPos.x -= (int)(farBuildingSpeed * deltaTime);
-    farBuildingsPos2.x -= (int)(farBuildingSpeed * deltaTime);
+void Scenery::update(const float &deltaTime, const float& gameSpeed) {
+    farBuildingsPos.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);
+    farBuildingsPos2.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);
     
-    buildingsPos.x -= (int)(buildingSpeed * deltaTime);
-    buildingsPos2.x -= (int)(buildingSpeed * deltaTime);
+    buildingsPos.x -= (int)(buildingSpeed * deltaTime * gameSpeed);
+    buildingsPos2.x -= (int)(buildingSpeed * deltaTime * gameSpeed);
     
-    foregroundPos.x -= (int)(foregroundSpeed * deltaTime);
-    foregroundPos2.x -= (int)(foregroundSpeed * deltaTime);
+    foregroundPos.x -= (int)(foregroundSpeed * deltaTime * gameSpeed);
+    foregroundPos2.x -= (int)(foregroundSpeed * deltaTime * gameSpeed);
     
     if (farBuildingsPos.x + WINDOW_WIDTH < 0)
         farBuildingsPos.x = farBuildingsPos2.x + WINDOW_WIDTH;
@@ -52,7 +52,6 @@ void Scenery::render() {
     graphics->renderTexture(foreground, &foregroundPos);
     graphics->renderTexture(foreground, &foregroundPos2);
     
-    //graphics->renderTexture(foreground, &window);
     SDL_SetRenderDrawColor(graphics->renderer(), 90, 90, 90, 1);
     SDL_RenderFillRect(graphics->renderer(), &ground);
 }

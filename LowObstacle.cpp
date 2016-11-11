@@ -15,9 +15,9 @@ void LowObstacle::render(SDL_Renderer* renderer) {
         SDL_RenderFillRect(renderer, &positionRects[i]);
 }
 
-void LowObstacle::move(const float& deltaTime) {
-    positionRects[0].x -= MOVE_SPEED * deltaTime;
-    positionRects[1].x -= MOVE_SPEED * deltaTime;
+void LowObstacle::move(const float& deltaTime, const float& gameVel) {
+    positionRects[0].x -= MOVE_SPEED * deltaTime * gameVel;
+    positionRects[1].x -= MOVE_SPEED * deltaTime * gameVel;
     if (positionRects[1].x + BLOCK_SIZE < 0)
         isOnscreen = false;
 }
@@ -25,4 +25,11 @@ void LowObstacle::move(const float& deltaTime) {
 void LowObstacle::move(const int& xPos) {
     positionRects[0].x = xPos;
     positionRects[1].x = xPos + BLOCK_SIZE + BLOCK_PADDING;
+}
+
+int LowObstacle::rightSideX() const {
+    return positionRects[positionRects.size()-1].x + positionRects[positionRects.size()-1].w;
+}
+int LowObstacle::leftSideX() const {
+    return positionRects[0].x;
 }

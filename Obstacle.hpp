@@ -9,15 +9,17 @@ class Obstacle {
 public:
     virtual ~Obstacle() {};
     
-    virtual void move(const float& deltaTime) = 0;
+    virtual void move(const float& deltaTime, const float& gameVel) = 0;
     virtual void move(const int& xPos) = 0;
     virtual void render(SDL_Renderer* renderer) = 0;
     
+    virtual int  rightSideX() const = 0;
+    virtual int  leftSideX()  const = 0;
     virtual int& type() = 0;
     virtual bool& isOnScreen() = 0;
     
     virtual std::vector<SDL_Rect>& positions() = 0;
-    enum type                  { low = 0, square, duckshort, ducklong };
+    enum type                  { low = 0, square, shortduck, longduck };
     
 protected:
     const int BLOCK_SIZE       {  42 };

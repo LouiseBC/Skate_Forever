@@ -14,8 +14,12 @@ public:
     void update(const float& deltaTime);
     void render();
     
+    void setGameDifficulty(int playerscore);
+    
 private:
-    bool pause         { false };
+    bool   pause       { false };
+    float  gameSpeed   { 1.0f };
+    bool   gamestart   { false };
     
     Game* game         { nullptr };
     Graphics* graphics { nullptr };

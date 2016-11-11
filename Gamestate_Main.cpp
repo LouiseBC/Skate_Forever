@@ -1,4 +1,5 @@
 #include "GameState_Main.hpp"
+#include "Obstacle.hpp"
 
 bool MainGameState::init(Graphics* graph, Game* gam) {
     game = gam;
@@ -23,18 +24,35 @@ void MainGameState::handleEvents(SDL_Event& event) {
         game->setQuit();
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
         game->setQuit();
-    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
-        pause = !pause;
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
+        if (gamestart == false)
+            gamestart = true;
+        else
+            pause = !pause;
+    }
     
     // Any other key event is player-related
     else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
         player.handleEvent(event, obstacles.type());
 }
 void MainGameState::update(const float& deltaTime) {
-    if (pause == false && player.status() != Player::state::dead) {
-        scenery.update(deltaTime);
-        obstacles.update(deltaTime);
-        player.update(deltaTime, obstacles.current());
+    if (gamestart == true && pause == false && player.status() != Player::state::dead) {
+        scenery.update(deltaTime, gameSpeed);
+        obstacles.update(deltaTime, gameSpeed);
+        player.update(deltaTime, obstacles.current(), gameSpeed);
+        
+        setGameDifficulty(player.score());
+    }
+}
+
+void MainGameState::setGameDifficulty(int playerscore) {
+    // push long duck obstacle to prepare for speed increase
+    if (playerscore > 0 && (playerscore + 1) % 5 == 0) {
+        obstacles.pushObstacle(Obstacle::type::longduck);
+    }
+    // increase speed next obstacle
+    else if (playerscore > 0 && player.score() % 5 == 0) {
+        gameSpeed += 0.002;
     }
 }
 

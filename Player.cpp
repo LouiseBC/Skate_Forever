@@ -6,7 +6,7 @@
 void Player::init(Graphics* graph) {
     graphics = graph;
     
-    playerStand = graphics->loadTexture("Assets/dinostand.png");
+    playerStand = graphics->loadTexture("Assets/dino.png");
     playerDuck  = graphics->loadTexture("Assets/dinoduck.png");
     renderTexture = playerStand;
 }
@@ -29,14 +29,14 @@ void Player::handleEvent(SDL_Event& event, const int& obstacletype) {
             if (currentState == state::onGround) {
                 currentState = state::ducking;
                 playerPos.h = SPRITE_HEIGHT_DUCK;
-                playerPos.y += DUCK_OFFSET;
+                playerPos.y += SPRITE_HEIGHT - SPRITE_HEIGHT_DUCK;
                 renderTexture = playerDuck;
             }
         }
         if (event.type == SDL_KEYUP && (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) ) {
             currentState = state::onGround;
             playerPos.h = SPRITE_HEIGHT;
-            playerPos.y -= DUCK_OFFSET;
+            playerPos.y -= SPRITE_HEIGHT - SPRITE_HEIGHT_DUCK;
             renderTexture = playerStand;
         }
     }
@@ -57,36 +57,41 @@ void Player::setJumpType(const int& obstacletype) {
     }
 }
 
-void Player::update(const float& deltaTime, Obstacle* currentObstacle) {
+void Player::update(const float& deltaTime, Obstacle* currentObstacle, const float& gameSpeed) {
     if (currentState == inAir) {
-        handleJump(deltaTime);
+        handleJump(deltaTime, gameSpeed);
     }
+    if (currentObstacle != nullptr) {
     checkCollision(currentObstacle);
     updateScore(currentObstacle);
+    }
 }
 
-void Player::handleJump(const float& deltaTime) {
+void Player::handleJump(const float& deltaTime, const float& gameSpeed) {
     if (obstacleType == Obstacle::type::square)
-        toggleJumpAnimation(); // 'detatch' skateboard graphic
+        toggleJumpAnimation();
     
-    playerPos.y += (int)(yVelocity * deltaTime);
-    yVelocity += gravity * deltaTime;
+    // Player is in air
+    playerPos.y += (int)(yVelocity * deltaTime * gameSpeed);
+    yVelocity += gravity * deltaTime * gameSpeed;
     
+    // Player landed
     if (playerPos.y >= Y_POS_DEFAULT) {
         currentState = state::onGround;
         playerPos.y = Y_POS_DEFAULT;
+        
         if (obstacleType == Obstacle::type::square)
-            toggleJumpAnimation(); // 'Re-attach' skateboard graphic
+            toggleJumpAnimation();
     }
 }
 void Player::toggleJumpAnimation() {
-    // 'Reattach' skateboard
+    // Reattach skateboard
     if (currentState == state::onGround) {
         playerClip = (SDL_Rect{0, 0, SPRITE_WIDTH, SPRITE_HEIGHT});
         playerPos.h = SPRITE_HEIGHT;
     }
     
-    // 'Detatch' skateboard
+    // Detatch skateboard
     else {
         playerClip.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
         playerPos.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
@@ -94,47 +99,65 @@ void Player::toggleJumpAnimation() {
 }
 
 void Player::checkCollision(Obstacle* currentObstacle) {
-    std::vector<SDL_Rect> temp = currentObstacle->positions();
+    std::vector<SDL_Rect> obstaclepositions = currentObstacle->positions();
     
-    if (currentObstacle->type() == Obstacle::type::low ||
-        currentObstacle->type() == Obstacle::type::square){
-        // Check if player moved on/off obstacle
-        isOnObstacle(currentObstacle);
-        
-        // Check collision with side of obstacle
-        if ( (playerPos.x + playerPos.w - SKATEBOARD_OFFSET > temp[0].x &&
-              playerPos.x < temp[0].x + temp[0].w/4) &&
-             (playerPos.y + playerPos.h > temp[0].y) ) {
-            //currentObstacle->move(playerPos.x + playerPos.w + 1);
-            currentState = state::dead;
-        }
-    }
-    else {
-        // Check collision with bottom of obstacle
-        if ( ((playerPos.y < temp[temp.size()-1].y + temp[temp.size()-1].h) &&
-              (playerPos.x + playerPos.w > temp[0].x)) &&
-              (playerPos.x + BACK_HEAD_OFFSET < temp[temp.size()-1].x + temp[temp.size()-1].w))
-            currentState = state::dead;
+    switch (currentObstacle->type()) {
+        case Obstacle::type::low:
+            isOnObstacle(obstaclepositions);
+            checkSideCollision(obstaclepositions);
+            break;
+        case Obstacle::type::square:
+            checkSideCollision(obstaclepositions);
+            checkTopCollision(obstaclepositions);
+            break;
+        case Obstacle::type::longduck: case Obstacle::type::shortduck:
+            checkBottomCollision(obstaclepositions);
+            break;
     }
 }
 
-void Player::isOnObstacle(Obstacle* currentObstacle) {
-    std::vector<SDL_Rect> temp = currentObstacle->positions();
-    
+void Player::checkSideCollision(std::vector<SDL_Rect> obstacle) {
+    // Check collision with side of obstacle
+    if ( (playerPos.x + playerPos.w - FRONT_SKATEBOARD_OFFSET > obstacle[0].x &&
+          playerPos.x < obstacle[0].x + obstacle[0].w/4) &&
+        (playerPos.y + playerPos.h > obstacle[0].y) ) {
+        //currentObstacle->move(playerPos.x + playerPos.w + 1);
+        currentState = state::dead;
+    }
+}
+
+void Player::checkTopCollision(std::vector<SDL_Rect> obstacle) {
+    // Check collision with top of obstacle
+    if ( (playerPos.x + playerPos.w > obstacle[obstacle.size()-1].x &&
+          playerPos.x < obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w/4) &&
+        (playerPos.y + playerPos.h > obstacle[obstacle.size()-1].y) ) {
+        playerPos.y = obstacle[obstacle.size()-1].y - playerPos.h;
+        currentState = state::dead;
+    }
+}
+
+void Player::checkBottomCollision(std::vector<SDL_Rect> obstacle) {
+    // Check collision with bottom of obstacle
+    if ( ((playerPos.y < obstacle[obstacle.size()-1].y + obstacle[obstacle.size()-1].h) &&
+          (playerPos.x + playerPos.w > obstacle[0].x)) &&
+        (playerPos.x + BACK_HEAD_OFFSET < obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w))
+        currentState = state::dead;
+}
+
+void Player::isOnObstacle(std::vector<SDL_Rect> obstacle) {
     // Player landed on obstacle
     if (currentState == state::inAir) {
-        if ( (playerPos.x + playerPos.w - SKATEBOARD_OFFSET > temp[0].x &&
-              playerPos.x + BACK_SKATEBOARD_OFFSET < temp[0].x + temp[0].w) &&
-             (playerPos.y + playerPos.h >= temp[0].y) ) {
+        if ( (playerPos.x + playerPos.w - FRONT_SKATEBOARD_OFFSET > obstacle[0].x &&
+              playerPos.x + BACK_SKATEBOARD_OFFSET < obstacle[0].x + obstacle[0].w) &&
+             (playerPos.y + playerPos.h >= obstacle[0].y) ) {
             // 'pause' jump mechanics & correct player position
             currentState = onObstacle;
-            playerPos.y = temp[temp.size()-1].y - playerPos.h - 1;
+            playerPos.y = obstacle[obstacle.size()-1].y - playerPos.h - 1;
         }
     }
-    
-    // Player moves off obstacle, 'restart' gravity mechanics
+    // Player moves off obstacle, restart gravity mechanics
     else if (playerPos.y < Y_POS_DEFAULT &&
-             playerPos.x + BACK_SKATEBOARD_OFFSET > temp[temp.size()-1].x + temp[temp.size()-1].w)
+             playerPos.x + BACK_SKATEBOARD_OFFSET > obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w)
         currentState = state:: inAir;
 }
 
@@ -156,9 +179,7 @@ void Player::updateScore(Obstacle* currentObstacle) {
 
 void Player::render() {
     graphics->renderTexture(renderTexture, &playerPos, &playerClip);
-    
-    //if (obstacleType == Obstacle::type::square && currentState == state::inAir)
-        //graphics->renderRotatedTexture(playerStand, &playerPos, &playerClip, 10, NULL);
+
     if (obstacleType == Obstacle::type::square) {// render skateboard separately
         graphics->renderTexture(playerStand, &skateBoardPos, &skateBoardClip);
     }
@@ -168,13 +189,13 @@ void Player::renderScore() {
     SDL_Colour fontColour  { 225, 225, 225, 1};
     std::string message = "Score: ";
     std::string scoreMSG = message + std::to_string(currentScore);
-    score = graphics->renderText(scoreMSG, "Assets/GreenFlame.ttf", fontColour, 25);
+    scoreTexture = graphics->renderText(scoreMSG, "Assets/GreenFlame.ttf", fontColour, 25);
     int w; int h;
-    SDL_QueryTexture(score, NULL, NULL, &w, &h);
+    SDL_QueryTexture(scoreTexture, NULL, NULL, &w, &h);
     SDL_Rect scorePosition;
     scorePosition.x = graphics->width()/2 - w/2;
     scorePosition.y = 80;
     scorePosition.w = w;
     scorePosition.h = h;
-    graphics->renderTexture(score, &scorePosition);
+    graphics->renderTexture(scoreTexture, &scorePosition);
 }

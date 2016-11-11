@@ -7,9 +7,13 @@ class Scenery {
 public:
     void init(Graphics* graphics);
     void destroy();
-    void update(const float& deltaTime);
+    void update(const float& deltaTime, const float& gameSpeed);
     void render();
 private:
+    const int farBuildingSpeed { 75 };
+    const int buildingSpeed    { 120 };
+    const int foregroundSpeed  { 220 };
+    
     Graphics* graphics;
     SDL_Texture* background;
     SDL_Texture* farBuildings;
@@ -20,10 +24,6 @@ private:
     const int GROUND_Y      { 429 };
     const int WINDOW_HEIGHT { 480 };
     const int WINDOW_WIDTH  { 720 };
-    
-    const int farBuildingSpeed { 75 };
-    const int buildingSpeed    { 120 };
-    const int foregroundSpeed  { 220 };
     
     std::vector<SDL_Rect> positions;
 

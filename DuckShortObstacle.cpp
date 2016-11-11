@@ -22,9 +22,9 @@ void DuckShortObstacle::render(SDL_Renderer* renderer) {
         SDL_RenderFillRect(renderer, &positionRects[i]);
 }
 
-void DuckShortObstacle::move(const float& deltaTime) {
+void DuckShortObstacle::move(const float& deltaTime, const float& gameVel) {
     for (int i = positionRects.size()-1; i >= 0; --i)
-        positionRects[i].x -= MOVE_SPEED * deltaTime;
+        positionRects[i].x -= MOVE_SPEED * deltaTime * gameVel;
     if (positionRects[positionRects.size()-1].x + BLOCK_SIZE < 0)
         isOnscreen = false;
 }
@@ -39,4 +39,12 @@ void DuckShortObstacle::move(const int &xPos) {
             ++count;
         }
     }
+}
+
+int DuckShortObstacle::rightSideX() const {
+    return positionRects[positionRects.size()-1].x + positionRects[positionRects.size()-1].w;
+}
+
+int DuckShortObstacle::leftSideX() const {
+    return positionRects[0].x;
 }
