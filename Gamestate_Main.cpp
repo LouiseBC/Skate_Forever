@@ -9,6 +9,7 @@ bool MainGameState::init(Graphics* graph, Game* gam) {
     scenery.init(graphics);
     obstacles.init(graphics);
     
+    playerScore = player.score();
     return true;
 }
 MainGameState::~MainGameState() {
@@ -42,18 +43,24 @@ void MainGameState::update(const float& deltaTime) {
         player.update(deltaTime, obstacles.current(), gameSpeed);
         
         setGameDifficulty(player.score());
+        std::cerr<< gameSpeed << std::endl;
     }
 }
 
 void MainGameState::setGameDifficulty(int playerscore) {
+    // Check that the speed hasn't already been updated
+    if (playerScore != playerscore) {
+        playerScore = playerscore;
+    
     // push long duck obstacle to prepare for speed increase
-    if (playerscore > 0 && (playerscore + 1) % 5 == 0) {
+    if (playerscore > 0 && (playerscore + 1) % 5 == 0)
         obstacles.pushObstacle(Obstacle::type::longduck);
+    else if (playerscore % 5 == 0)
+        gameSpeed += 0.1;
     }
-    // increase speed next obstacle
-    else if (playerscore > 0 && player.score() % 5 == 0) {
-        gameSpeed += 0.002;
-    }
+    // Change background colour
+    //if (playerscore == 15)
+        //scenery.setBackGroundColour(Scenery::colour::yellow);
 }
 
 void MainGameState::render() {

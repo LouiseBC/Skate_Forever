@@ -18,8 +18,9 @@ public:
     
 private:
     bool   pause       { false };
-    float  gameSpeed   { 1.0f };
+    float  gameSpeed   { 1.2f };
     bool   gamestart   { false };
+    int    playerScore { -1 };
     
     Game* game         { nullptr };
     Graphics* graphics { nullptr };

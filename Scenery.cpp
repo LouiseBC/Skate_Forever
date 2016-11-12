@@ -14,6 +14,17 @@ void Scenery::destroy() {
     graphics = nullptr;
 }
 
+void Scenery::setBackGroundColour(int colour) {
+    Uint8 r = 0; Uint8 g = 0; Uint8 b = 0;
+    switch(colour) {
+        case 1: r = 100; g = 0; b = 0;
+            break;
+        default:
+            break;
+    }
+    SDL_SetTextureColorMod( background, r, g, b );
+}
+
 void Scenery::update(const float &deltaTime, const float& gameSpeed) {
     farBuildingsPos.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);
     farBuildingsPos2.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);

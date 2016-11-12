@@ -9,6 +9,9 @@ public:
     void destroy();
     void update(const float& deltaTime, const float& gameSpeed);
     void render();
+    
+    void setBackGroundColour(int colour);
+    enum colour { none = 0, yellow };
 private:
     const int farBuildingSpeed { 75 };
     const int buildingSpeed    { 120 };
