@@ -14,7 +14,31 @@ void Scenery::destroy() {
     graphics = nullptr;
 }
 
+void Scenery::setBackGroundColour(int colour) {
+    bgColour = colour;
+}
+
+void Scenery::updateBgColour() {
+    switch(bgColour) {
+        case colour::yellow: if (r != 225) ++r;
+                if (g != 170) --g;
+                if (b != 170) --b;
+            break;
+        case colour::blue: if (r != 210) --r;
+                           if (g != 180) --g;
+                           if (b != 225) ++b;
+        default:
+            break;
+    }
+    SDL_SetTextureColorMod( background, r, g, b );
+    SDL_SetTextureColorMod( farBuildings, r, g, b );
+    SDL_SetTextureColorMod( buildings, r, g, b );
+    SDL_SetTextureColorMod( foreground, r, g, b );
+}
+
 void Scenery::update(const float &deltaTime, const float& gameSpeed) {
+    //updateBgColour();
+    
     farBuildingsPos.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);
     farBuildingsPos2.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);
     

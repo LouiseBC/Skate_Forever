@@ -1,8 +1,9 @@
 #include "Game.hpp"
-#include "Gamestate_Main.hpp"
+#include "GameState_Menu.hpp"
+#include "GameState_Main.hpp"
 
 int main() {
     Game game;
-    if (game.init(new MainGameState))
+    if (game.init(new MenuState))
         game.loop();
 }

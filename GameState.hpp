@@ -8,7 +8,7 @@ public:
     virtual bool init(Graphics* graphics, Game* game)  = 0;
     virtual ~GameState() {};
     
-    virtual void handleEvents(SDL_Event& e) = 0;
+    virtual void handleEvents(SDL_Event& event) = 0;
     virtual void update(const float& deltaTime) = 0;
     virtual void render() = 0;
 };

@@ -1,6 +1,7 @@
 #ifndef Player_hpp
 #define Player_hpp
 #include "Graphics.hpp"
+#include <SDL2_mixer/SDL_mixer.h>
 #include <vector>
 
 class Obstacle;
@@ -14,7 +15,6 @@ public:
     void update(const float& deltaTime, Obstacle* currentObstacle, const float& gameSpeed);
     void updateScore(Obstacle* currentObstacle);
     void render();
-    void renderScore();
     
     void setJumpType(const int& obstacletype);
     void handleJump(const float& deltaTime, const float& gameSpeed);
@@ -35,6 +35,7 @@ private:
     int  currentState  { state::onGround };
     int  currentScore  { 0 };
     int  highScore     { 0 };
+    bool scoreUpdated  { false };
     
     // Movement data
     float yVelocity;
@@ -58,15 +59,20 @@ private:
     SDL_Texture* renderTexture    { nullptr };
     SDL_Texture* playerStand      { nullptr };
     SDL_Texture* playerDuck       { nullptr };
+    Mix_Chunk* kickoff            { nullptr };
+    Mix_Chunk* playerLand1        { nullptr };
+    Mix_Chunk* playerLand2        { nullptr };
+    Mix_Chunk* highJump           { nullptr };
+    Mix_Chunk* highJumpLand       { nullptr };
+    Mix_Chunk* duck               { nullptr };
+    Mix_Chunk* deathSound         { nullptr };
+    Mix_Chunk* levelUp            { nullptr };
+    
     
     SDL_Rect playerPos     { X_POS, Y_POS_DEFAULT, SPRITE_WIDTH, SPRITE_HEIGHT }; // player + skateboard
     SDL_Rect playerClip    { 0, 0, SPRITE_WIDTH, SPRITE_HEIGHT };
     SDL_Rect skateBoardClip{ 0, SPRITE_HEIGHT - SKATEBOARD_HEIGHT, SPRITE_WIDTH, SKATEBOARD_HEIGHT}; // only skateboard
     SDL_Rect skateBoardPos { X_POS, Y_POS_DEFAULT + SPRITE_HEIGHT - SKATEBOARD_HEIGHT, SPRITE_WIDTH, SKATEBOARD_HEIGHT };
-    
-    // Score rendering
-    SDL_Texture* scoreTexture { nullptr };
-    bool scoreUpdated  { false };
 };
 
 #endif

@@ -9,10 +9,20 @@ public:
     void destroy();
     void update(const float& deltaTime, const float& gameSpeed);
     void render();
+    
+    void setBackGroundColour(int colour);
+    void updateBgColour();
+    enum colour { none = 0, yellow, blue };
 private:
     const int farBuildingSpeed { 75 };
     const int buildingSpeed    { 120 };
     const int foregroundSpeed  { 220 };
+    
+    int bgColour    { -1 };
+    bool bgIsSet    { true };
+    Uint8 r { 225 };
+    Uint8 g { 225 };
+    Uint8 b { 225 };
     
     Graphics* graphics;
     SDL_Texture* background;

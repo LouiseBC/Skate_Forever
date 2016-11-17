@@ -13,6 +13,11 @@ bool Graphics::setup() {
         return false;
     }
     
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::cerr << "Error: OpenAudio Init" << Mix_GetError() << std::endl;
+        return false;
+    }
+    
     window = SDL_CreateWindow("Skate Forever", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == nullptr) {
@@ -45,9 +50,9 @@ void Graphics::renderTexture(SDL_Texture *texture, SDL_Rect* position, SDL_Rect*
     SDL_RenderCopy(rend, texture, clip, position);
 }
 
-void Graphics::renderRotatedTexture(SDL_Texture *texture, SDL_Rect* position, SDL_Rect* clip, const double angle, const
-                                    SDL_Point center) {
-    SDL_RenderCopyEx(rend, texture, clip, position, angle, &center, SDL_FLIP_NONE);
+void Graphics::renderRotatedTexture(SDL_Texture *texture, SDL_Rect* position, const double angle, const
+                                    SDL_Point* center, SDL_RendererFlip flip, SDL_Rect* clip) {
+    SDL_RenderCopyEx(rend, texture, clip, position, angle, center, flip);
 }
 
 SDL_Texture* Graphics::renderText(const std::string &message, const std::string &filepath, SDL_Color colour, int fontsize) {
@@ -70,4 +75,20 @@ SDL_Texture* Graphics::renderText(const std::string &message, const std::string 
     SDL_FreeSurface(surf);
     TTF_CloseFont(font);
     return texture;
+}
+
+Mix_Chunk* Graphics::loadSound(std::string filepath) {
+    Mix_Chunk* temp = Mix_LoadWAV(filepath.c_str());
+    if( temp == nullptr ) {
+        std::cerr << "Failed to load sound', error:" << Mix_GetError() << std::endl;
+    }
+    return temp;
+}
+
+Mix_Music* Graphics::loadMusic(std::string filepath) {
+    Mix_Music* temp = Mix_LoadMUS(filepath.c_str());
+    if( temp == nullptr ) {
+        std::cerr << "Failed to load music', error:" << Mix_GetError() << std::endl;
+    }
+    return temp;
 }
