@@ -19,6 +19,16 @@ void Obstacles::destroy() {
     nextObstacle = nullptr;
 }
 
+void Obstacles::restart() {
+    delete currentObstacle;
+    delete nextObstacle;
+    currentObstacle = new SquareObstacle;
+    nextObstacle = nullptr;
+    
+    forcedObstacle = -1;
+    previousObstacle = -1;
+}
+
 void Obstacles::update(const float& deltaTime, const float& gameVel) {
     if (currentObstacle->isOnScreen())
         currentObstacle->move(deltaTime, gameVel);
@@ -58,7 +68,7 @@ Obstacle* Obstacles::getNewObstacle() {
         obstacletype = forcedObstacle;
         forcedObstacle = -1;
     }
-    else // pick random non-duplicate obstacle
+    else // pick random obstacle
         obstacletype = getRandomObstacle();
     previousObstacle = obstacletype;
     
@@ -80,10 +90,10 @@ int Obstacles::getRandomObstacle() {
     std::mt19937 rng(rd());
     std::uniform_int_distribution<int> range(0, 2);
     int obstacletype = range(rd);
-    if (previousObstacle == obstacletype) {
-        while (previousObstacle == obstacletype)
-            obstacletype = range(rd);
-    }
+    //if (previousObstacle == obstacletype) {
+    //    while (previousObstacle == obstacletype)
+    //        obstacletype = range(rd);
+    //}
     return obstacletype;
 }
 

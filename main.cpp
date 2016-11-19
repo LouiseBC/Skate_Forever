@@ -4,6 +4,6 @@
 
 int main() {
     Game game;
-    if (game.init(new MenuState))
+    if (game.init(new MainGameState))
         game.loop();
 }

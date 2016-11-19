@@ -4,40 +4,35 @@
 void Scenery::init(Graphics *graph) {
     graphics = graph;
     
+    // Load background textures
     background = graphics->loadTexture("Assets/background.png");
     farBuildings = graphics->loadTexture("Assets/farbuildings.png");
     buildings = graphics->loadTexture("Assets/buildings.png");
     foreground = graphics->loadTexture("Assets/foreground.png");
+    
+    // load positions of graphics
+    restart();
 }
 
 void Scenery::destroy() {
     graphics = nullptr;
 }
 
-void Scenery::setBackGroundColour(int colour) {
-    bgColour = colour;
-}
-
-void Scenery::updateBgColour() {
-    switch(bgColour) {
-        case colour::yellow: if (r != 225) ++r;
-                if (g != 170) --g;
-                if (b != 170) --b;
-            break;
-        case colour::blue: if (r != 210) --r;
-                           if (g != 180) --g;
-                           if (b != 225) ++b;
-        default:
-            break;
-    }
-    SDL_SetTextureColorMod( background, r, g, b );
-    SDL_SetTextureColorMod( farBuildings, r, g, b );
-    SDL_SetTextureColorMod( buildings, r, g, b );
-    SDL_SetTextureColorMod( foreground, r, g, b );
+void Scenery::restart() {
+    ground = SDL_Rect { GROUND_X, GROUND_Y, WINDOW_WIDTH, WINDOW_HEIGHT-GROUND_Y };
+    backgroundPos = SDL_Rect { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    
+    farBuildingsPos = SDL_Rect { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    farBuildingsPos2 = SDL_Rect { WINDOW_WIDTH, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    
+    buildingsPos = SDL_Rect { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    buildingsPos2 = SDL_Rect {WINDOW_WIDTH, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    
+    foregroundPos = SDL_Rect { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    foregroundPos2 = SDL_Rect { WINDOW_WIDTH, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
 }
 
 void Scenery::update(const float &deltaTime, const float& gameSpeed) {
-    //updateBgColour();
     
     farBuildingsPos.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);
     farBuildingsPos2.x -= (int)(farBuildingSpeed * deltaTime * gameSpeed);

@@ -10,23 +10,46 @@ void Player::init(Graphics* graph) {
     playerStand = graphics->loadTexture("Assets/dino.png");
     playerDuck  = graphics->loadTexture("Assets/dinoduck.png");
     renderTexture = playerStand;
+    SDL_SetTextureBlendMode( renderTexture, SDL_BLENDMODE_BLEND );
     
     kickoff      = graphics->loadSound("Assets/kickoff.wav");
     playerLand1  = graphics->loadSound("Assets/landsound1.wav");
     playerLand2  = graphics->loadSound("Assets/landsound2.wav");
     highJump     = graphics->loadSound("Assets/jump.wav");
     highJumpLand = graphics->loadSound("Assets/highjumpland.wav");
-    duck         = graphics->loadSound("Assets/duck.wav");
+    duckSound    = graphics->loadSound("Assets/duck.wav");
     deathSound   = graphics->loadSound("Assets/deathsound.wav");
     levelUp      = graphics->loadSound("Assets/levelup.wav");
     
     Mix_VolumeChunk(highJump, 30);
-    Mix_VolumeChunk(duck, 30);
+    Mix_VolumeChunk(duckSound, 30);
     //Mix_VolumeChunk(levelUp, 30);
 }
 
 void Player::destroy() {
     graphics = nullptr;
+}
+
+void Player::restart() {
+    playerPos.y = Y_POS_DEFAULT;
+    renderTexture = playerStand;
+    textureRotation = 0;
+    
+    playerShadowPos = playerPos;
+    skateBoardShadowPos = skateBoardPos;
+    playerShadow2Pos = playerPos ;
+    skateBoardShadow2Pos = skateBoardPos;
+    shadowRotation = 0;
+    shadow2Rotation = 0;
+    
+    currentState = Player::state::onGround;
+    currentScore = 0;
+}
+
+bool Player::getState() const {
+    if (currentState == Player::state::dead)
+        return true;
+    return false;
 }
 
 void Player::handleEvent(SDL_Event& event, const int& obstacletype) {
@@ -35,37 +58,43 @@ void Player::handleEvent(SDL_Event& event, const int& obstacletype) {
         if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) {
             if (currentState == state::onGround) {
                 currentState = state::inAir;
-                setJumpType(obstacletype);
+                setJumpHeight(obstacletype);
             }
         }
-        // Duck
         if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) {
-            if (currentState == state::onGround) {
-                currentState = state::ducking;
-                playerPos.h = SPRITE_HEIGHT_DUCK;
-                playerPos.y += SPRITE_HEIGHT - SPRITE_HEIGHT_DUCK;
-                renderTexture = playerDuck;
-                Mix_PlayChannel(-1, duck, 0);
-            }
+            if (currentState == state::onGround)
+                duck();
         }
-        if (event.type == SDL_KEYUP && (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) ) {
-            currentState = state::onGround;
-            playerPos.h = SPRITE_HEIGHT;
-            playerPos.y -= SPRITE_HEIGHT - SPRITE_HEIGHT_DUCK;
-            renderTexture = playerStand;
-        }
+        if (event.type == SDL_KEYUP && (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) )
+            stopDucking();
     }
 }
 
-void Player::setJumpType(const int& obstacletype) {
+void Player::duck() {
+    currentState = state::ducking;
+    playerPos.h = SPRITE_HEIGHT_DUCK - SKATEBOARD_HEIGHT;
+    playerPos.y += SPRITE_HEIGHT - SPRITE_HEIGHT_DUCK;
+    playerClip.h = SPRITE_HEIGHT_DUCK - SKATEBOARD_HEIGHT;
+    renderTexture = playerDuck;
+    Mix_PlayChannel(-1, duckSound, 0);
+}
+
+void Player::stopDucking() {
+    currentState = state::onGround;
+    playerPos.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
+    playerPos.y -= SPRITE_HEIGHT - SPRITE_HEIGHT_DUCK;
+    playerClip.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
+    renderTexture = playerStand;
+}
+
+void Player::setJumpHeight(const int& obstacletype) {
     obstacleType = obstacletype;
-    
     switch(obstacletype) {
         case Obstacle::type::square: // High jump
             yVelocity        = -600.0f;
             gravity          = 1050.0f;
             break;
-        default: // Low jump
+        default:                    // Low jump
             yVelocity        = -400.0f;
             gravity          = 1200.0f;
             break;
@@ -73,50 +102,64 @@ void Player::setJumpType(const int& obstacletype) {
 }
 
 void Player::update(const float& deltaTime, Obstacle* currentObstacle, const float& gameSpeed) {
-    if (currentState == inAir) {
+    // Assign previous position of player to shadows
+    updateShadows(deltaTime);
+    
+    if (currentState == inAir)
         handleJump(deltaTime, gameSpeed);
-    }
     
     checkCollision(currentObstacle);
     updateScore(currentObstacle);
+    jiggleSkateboard();
 }
 
 void Player::handleJump(const float& deltaTime, const float& gameSpeed) {
-    if (obstacleType == Obstacle::type::square) {
-        toggleJumpAnimation();
-    }
-    
+    // Low obstacle: player first kicks off ground.
     if (obstacleType == Obstacle::type::low && playerPos.y == Y_POS_DEFAULT)
-        Mix_PlayChannel(-1, kickoff, 0);
+        handleLowJump();
     
-    // Player is in air
+    // Square obstacle: Apply rotation
+    if (obstacleType == Obstacle::type::square)
+        handleHighJump(deltaTime, gameSpeed);
+    
+    // Apply gravity / jump velocity
     playerPos.y += (int)(yVelocity * deltaTime * gameSpeed);
     yVelocity += gravity * deltaTime * gameSpeed;
     
     // Player landed
-    if (playerPos.y >= Y_POS_DEFAULT) {
-        currentState = state::onGround;
-        playerPos.y = Y_POS_DEFAULT;
-        if (obstacleType == Obstacle::type::low)
-            Mix_PlayChannel(-1, playerLand2, 0);
-        
-        if (obstacleType == Obstacle::type::square)
-            toggleJumpAnimation();
-    }
+    if (playerPos.y >= Y_POS_DEFAULT)
+        handleLanding();
 }
-void Player::toggleJumpAnimation() {
-    // Reattach skateboard
-    if (currentState == state::onGround) {
-        playerClip = (SDL_Rect{0, 0, SPRITE_WIDTH, SPRITE_HEIGHT});
-        playerPos.h = SPRITE_HEIGHT;
-        Mix_PlayChannel(-1, highJumpLand, 0);
-    }
-    
-    // Detatch skateboard
-    else if (playerClip.h == SPRITE_HEIGHT) {
-        playerClip.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
-        playerPos.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
+
+void Player::handleLowJump() {
+    Mix_PlayChannel(-1, kickoff, 0);
+    // render whole player
+    playerPos.h = SPRITE_HEIGHT;
+    playerClip.h = SPRITE_HEIGHT;
+    renderSeparateSkateboard = false;
+}
+
+void Player::handleHighJump(const float& deltaTime, const float& gameSpeed) {
+    // Play sound at kickoff
+    if (playerPos.y == Y_POS_DEFAULT)
         Mix_PlayChannel(-1, highJump, 0);
+    textureRotation += (int)(320 * deltaTime * gameSpeed);
+}
+
+void Player::handleLanding() {
+    currentState = state::onGround;
+    // reset player position
+    playerPos.y = Y_POS_DEFAULT;
+    playerPos.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
+    playerClip.h = SPRITE_HEIGHT - SKATEBOARD_HEIGHT;
+    // Obstacle-specific sounds / data reset
+    if (obstacleType == Obstacle::type::low) {
+        Mix_PlayChannel(-1, playerLand2, 0);
+        renderSeparateSkateboard = true;
+    }
+    if (obstacleType == Obstacle::type::square) {
+        Mix_PlayChannel(-1, highJumpLand, 0);
+        textureRotation = 0;
     }
 }
 
@@ -136,6 +179,24 @@ void Player::checkCollision(Obstacle* currentObstacle) {
             checkBottomCollision(obstaclepositions);
             break;
     }
+}
+
+void Player::isOnObstacle(std::vector<SDL_Rect> obstacle) {
+    // Player landed on obstacle
+    if (currentState == state::inAir) {
+        if ( (playerPos.x + playerPos.w - FRONT_SKATEBOARD_OFFSET > obstacle[0].x &&
+              playerPos.x + BACK_SKATEBOARD_OFFSET < obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w) &&
+            (playerPos.y + playerPos.h >= obstacle[0].y) ) {
+            // 'pause' jump mechanics & correct player position
+            currentState = state::onObstacle;
+            playerPos.y = obstacle[obstacle.size()-1].y - playerPos.h - 1;
+            Mix_PlayChannel(-1, playerLand1, 0);
+        }
+    }
+    // Player moves off obstacle, restart gravity mechanics
+    else if (playerPos.y < Y_POS_DEFAULT &&
+             playerPos.x + BACK_SKATEBOARD_OFFSET > obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w)
+        currentState = state:: inAir;
 }
 
 void Player::checkSideCollision(std::vector<SDL_Rect> obstacle) {
@@ -170,22 +231,29 @@ void Player::checkBottomCollision(std::vector<SDL_Rect> obstacle) {
     }
 }
 
-void Player::isOnObstacle(std::vector<SDL_Rect> obstacle) {
-    // Player landed on obstacle
-    if (currentState == state::inAir) {
-        if ( (playerPos.x + playerPos.w - FRONT_SKATEBOARD_OFFSET > obstacle[0].x &&
-              playerPos.x + BACK_SKATEBOARD_OFFSET < obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w) &&
-             (playerPos.y + playerPos.h >= obstacle[0].y) ) {
-            // 'pause' jump mechanics & correct player position
-            currentState = state::onObstacle;
-            playerPos.y = obstacle[obstacle.size()-1].y - playerPos.h - 1;
-            Mix_PlayChannel(-1, playerLand1, 0);
-        }
+void Player::updateShadows(const float& deltaTime) {
+    if (shadowUpdateCounter == 5) {
+        // Second shadow data
+        playerShadow2Pos = playerShadowPos;
+        playerShadow2Pos.x -= SHADOW_OFFSET;
+        playerShadow2Clip.h = playerShadowClip.h;
+        
+        skateBoardShadow2Pos = skateBoardShadowPos;
+        skateBoardShadow2Pos.x -= SHADOW_OFFSET;
+        shadow2Rotation = shadowRotation;
+        
+        // First shadow data
+        playerShadowPos = playerPos;
+        playerShadowPos.x -= SHADOW_OFFSET;
+        playerShadowClip.h = playerClip.h;
+        
+        skateBoardShadowPos = skateBoardPos;
+        skateBoardShadowPos.x -= SHADOW_OFFSET;
+        shadowRotation = textureRotation;
+        
+        shadowUpdateCounter = 0;
     }
-    // Player moves off obstacle, restart gravity mechanics
-    else if (playerPos.y < Y_POS_DEFAULT &&
-             playerPos.x + BACK_SKATEBOARD_OFFSET > obstacle[obstacle.size()-1].x + obstacle[obstacle.size()-1].w)
-        currentState = state:: inAir;
+    else ++shadowUpdateCounter;
 }
 
 void Player::updateScore(Obstacle* currentObstacle) {
@@ -204,10 +272,39 @@ void Player::updateScore(Obstacle* currentObstacle) {
         scoreUpdated = false;
 }
 
-void Player::render() {
-    graphics->renderTexture(renderTexture, &playerPos, &playerClip);
+void Player::jiggleSkateboard() {
+    // Not implemented deltaTime - To Do.
+    if (frameCount == 3) {
+       if (movedAmount == 2)
+           direction = -1;
+        else if (movedAmount == 0)
+            direction = 1;
+        
+        skateBoardPos.x += direction;
+        movedAmount     += direction;
+        frameCount = 0;
+    }
+    else
+        ++frameCount;
+}
 
-    if (obstacleType == Obstacle::type::square) {// render skateboard separately
+void Player::render() {
+    SDL_SetTextureAlphaMod( renderTexture, 70 );
+    graphics->renderRotatedTexture(renderTexture, &playerShadow2Pos, shadow2Rotation,
+                                   NULL, SDL_FLIP_NONE, &playerShadow2Clip);
+    SDL_SetTextureAlphaMod( renderTexture, 100 );
+    graphics->renderRotatedTexture(renderTexture, &playerShadowPos, shadowRotation,
+                                   NULL, SDL_FLIP_NONE, &playerShadowClip);
+    SDL_SetTextureAlphaMod( renderTexture, 255 );
+    graphics->renderRotatedTexture(renderTexture, &playerPos, textureRotation,
+                                   NULL, SDL_FLIP_NONE, &playerClip);
+    
+    if (renderSeparateSkateboard) {
+        SDL_SetTextureAlphaMod( playerStand, 70 );
+        graphics->renderTexture(playerStand, &skateBoardShadow2Pos, &skateBoardClip);
+        SDL_SetTextureAlphaMod( playerStand, 100 );
+        graphics->renderTexture(playerStand, &skateBoardShadowPos, &skateBoardClip);
+        SDL_SetTextureAlphaMod( playerStand, 255 );
         graphics->renderTexture(playerStand, &skateBoardPos, &skateBoardClip);
     }
 }

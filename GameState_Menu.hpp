@@ -15,12 +15,10 @@ public:
     
     void loadPositions();
     void wrapButton(const int& button, SDL_Rect& arrow1, SDL_Rect& arrow2);
-    void wrapQuitButton(SDL_Rect& arrow1, SDL_Rect& arrow2);
 
-    void setRollover(const int& mouseposition);
+    void setRollover(const int& button);
     void jiggleButton(MenuButton& activebutton, const float& deltaTime);
 private:
-    MenuButton* activeButton;
     MenuButton startButton;
     MenuButton scoresButton;
     MenuButton quitButton;

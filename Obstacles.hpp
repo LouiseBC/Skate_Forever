@@ -12,6 +12,8 @@ public:
     
     void update(const float& deltaTime, const float& gameVel);
     void render();
+    void restart();
+    
     void reset();
     int getRandomObstacle();
     Obstacle* getNewObstacle();
@@ -19,11 +21,10 @@ public:
     
     int type();
     Obstacle* current();
-    
 private:
     int   forcedObstacle    { -1 };
     int   previousObstacle  { -1 };
-    float   defaultSpeed    { 1.2f};
+    float   defaultSpeed    { 1.6f};
     const int WINDOW_WIDTH  { 720 };
     
     Graphics* graphics = nullptr;

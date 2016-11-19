@@ -4,6 +4,9 @@
 #include "Player.hpp"
 #include "Scenery.hpp"
 #include "Obstacles.hpp"
+#include "HUD.hpp"
+
+class HUD;
 
 class MainGameState : public GameState {
 public:
@@ -13,22 +16,20 @@ public:
     void handleEvents(SDL_Event& e);
     void update(const float& deltaTime);
     void render();
-    void renderScore();
-    void renderHighScore();
-    void renderCountDown(const std::string message1, const std::string message2, const std::string message3);
-    void renderPause(const std::string& message);
-    
+    void restart();
+
     void getHighScore();
     void updateHighScore();
     void setGameDifficulty(int playerscore);
 private:
-    bool  pause          { false };
-    bool  gameBeginning  { true };
-    float gameSpeed      { 1.2f };
-    int   playerScore    { -1 };
+    bool  paused              { false };
+    bool  isGameBeginning      { true };
+    float countDownTimer     { 0.0f };
+    bool  playerIsDead       { false };
+    int   playerScore        { -1 };
     int   highScore;
-    float countDownPacer { 0 };
-    std::string countDown { "" };
+    const float defaultSpeed { 1.6f };
+    float gameSpeed          { defaultSpeed };
     
     Game* game         { nullptr };
     Graphics* graphics { nullptr };
@@ -36,19 +37,11 @@ private:
     Player player;
     Scenery scenery;
     Obstacles obstacles;
+    HUD hud;
     
     Mix_Music* music { nullptr };
     Mix_Chunk* pauseStart { nullptr };
     Mix_Chunk* pauseStop  { nullptr };
-    
-    // Score rendering
-    SDL_Texture* scoreTexture { nullptr };
-    SDL_Texture* highScoreTexture { nullptr };
-    SDL_Texture* countDownTexture { nullptr };
-    SDL_Texture* pauseTexture     { nullptr };
-    
-    const int WINDOW_WIDTH  { 720 };
-    const int WINDOW_HEIGHT { 480 };
 };
 
 #endif

@@ -5,17 +5,20 @@ bool MenuState::init(Graphics *graph, Game *gam) {
     graphics = graph;
     game = gam;
     
+    // Load textures and sounds
     backgroundTex = graphics->loadTexture("Assets/menubackground.png");
     arrow = graphics->loadTexture("Assets/arrow.png");
-    startButton.isActive = true;
     
     move = graphics->loadSound("Assets/menu_move.wav");
     select = graphics->loadSound("Assets/menu_select.wav");
     quitsound = graphics->loadSound("Assets/menu_quit.wav");
     
+    // Set button information
     startButton.texture = graphics->renderText("Start", "Assets/GreenFlame.ttf", fontColour, 30);
     quitButton.texture = graphics->renderText("Quit", "Assets/GreenFlame.ttf", fontColour, 30);
+    startButton.isActive = true;
     
+    // Load position of buttons and selection arrows
     loadPositions();
     
     return true;

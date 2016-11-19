@@ -7,22 +7,14 @@ class Scenery {
 public:
     void init(Graphics* graphics);
     void destroy();
+    
     void update(const float& deltaTime, const float& gameSpeed);
     void render();
-    
-    void setBackGroundColour(int colour);
-    void updateBgColour();
-    enum colour { none = 0, yellow, blue };
+    void restart();
 private:
     const int farBuildingSpeed { 75 };
     const int buildingSpeed    { 120 };
     const int foregroundSpeed  { 220 };
-    
-    int bgColour    { -1 };
-    bool bgIsSet    { true };
-    Uint8 r { 225 };
-    Uint8 g { 225 };
-    Uint8 b { 225 };
     
     Graphics* graphics;
     SDL_Texture* background;
@@ -34,20 +26,18 @@ private:
     const int GROUND_Y      { 429 };
     const int WINDOW_HEIGHT { 480 };
     const int WINDOW_WIDTH  { 720 };
-    
-    std::vector<SDL_Rect> positions;
 
-    SDL_Rect ground { GROUND_X, GROUND_Y, WINDOW_WIDTH, WINDOW_HEIGHT-GROUND_Y };
-    SDL_Rect backgroundPos { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    SDL_Rect ground;
+    SDL_Rect backgroundPos;
     
-    SDL_Rect farBuildingsPos { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
-    SDL_Rect farBuildingsPos2 { WINDOW_WIDTH, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    SDL_Rect farBuildingsPos;
+    SDL_Rect farBuildingsPos2;
     
-    SDL_Rect buildingsPos { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
-    SDL_Rect buildingsPos2 { WINDOW_WIDTH, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    SDL_Rect buildingsPos;
+    SDL_Rect buildingsPos2;
     
-    SDL_Rect foregroundPos { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
-    SDL_Rect foregroundPos2 { WINDOW_WIDTH, 0, WINDOW_WIDTH, WINDOW_HEIGHT + 50 };
+    SDL_Rect foregroundPos;
+    SDL_Rect foregroundPos2;
 };
 
 
