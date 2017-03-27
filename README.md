@@ -1,2 +1,4 @@
+![Screenshot](https://github.com/LouiseBC/Skate_Forever/blob/master/sceenshot.png)
+
 # Skate_Forever
-An attempt to recreate the 'Skate Forever' minigame from 'Wario Ware Mega Microgames' (GBA) - Work In Progress.
+An recreation of the 'Skate Forever' minigame from 'Wario Ware Mega Microgames' (GBA).
